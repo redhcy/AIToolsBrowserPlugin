@@ -25,7 +25,7 @@ async function checkUrlsHealth() {
                 let retryCount = 0;
                 
                 // 特殊处理某些可能需要GET请求的URL
-                const useGetMethod = tool.url.includes('tradingview.com') || tool.url.includes('leonardo.ai');
+                const useGetMethod = tool.url.includes('tradingview.com') || tool.url.includes('leonardo.ai') || tool.url.includes('xueqiu.com');
                 
                 // 重试机制
                 while (!isHealthy && retryCount < maxRetries) {
@@ -51,10 +51,10 @@ async function checkUrlsHealth() {
                     } catch (error) {
                         retryCount++;
                         
-                        // 对leonardo.ai做特殊处理，因为它可能有特殊的CORS限制
-                        if (tool.url.includes('leonardo.ai') && error.message.includes('Failed to fetch')) {
-                            console.warn(`Leonardo.ai 检测失败（第${retryCount}次）：可能是 CORS 限制或网络问题`); 
-                            // 对leonardo.ai，在最后一次重试时不标记为错误，而是保持上次的状态
+                        // 对leonardo.ai和xueqiu.com做特殊处理，因为它们可能有特殊的CORS限制
+                        if ((tool.url.includes('leonardo.ai') || tool.url.includes('xueqiu.com')) && error.message.includes('Failed to fetch')) {
+                            console.warn(`${tool.name} 检测失败（第${retryCount}次）：可能是 CORS 限制或网络问题`); 
+                            // 对这些网站，在最后一次重试时不标记为错误，而是保持上次的状态
                             if (retryCount === maxRetries) {
                                 // 如果之前没有状态或状态是 ok，不改变状态
                                 if (!tool.status || tool.status === 'ok') {
@@ -99,174 +99,10 @@ async function checkUrlsHealth() {
     console.log('URL健康检测完成');
 }
 
-// 新闻轮播 - 每30分钟更新一次
-chrome.alarms.create('newsUpdate', { delayInMinutes: 0, periodInMinutes: 30 });
-
-chrome.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name === 'newsUpdate') {
-        await updateNews();
-    }
-});
-
-// 更新新闻
-async function updateNews() {
-    console.log('开始更新新闻...');
-    
-    // 备选新闻源列表 - 优先使用国内新闻源
-    const newsSources = [
-        {
-            url: 'https://news.baidu.com/rss',
-            name: '百度新闻'
-        },
-        {
-            url: 'https://rss.sina.com.cn/news/china/focus15.xml',
-            name: '新浪新闻'
-        },
-        {
-            url: 'https://rss.qq.com/news/nationalnews/rss_news_index.xml',
-            name: '腾讯新闻'
-        },
-        {
-            url: 'https://news.163.com/special/00012200/rss_newsattitude.xml',
-            name: '网易新闻'
-        },
-        {
-            url: 'https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-Hans',
-            name: 'Google News (中文站)'
-        },
-        {
-            url: 'https://rss.cnn.com/rss/edition.rss',
-            name: 'CNN (国际新闻)'
-        }
-    ];
-
-    // 默认新闻数据（当所有源都失败时使用） - 国内热点新闻
-    const defaultNews = [
-        {
-            title: '国内科技创新能力持续提升',
-            link: '#',
-            description: '近年来，我国在人工智能、航天技术、量子计算等领域取得突破性进展，科技创新能力显著提升。',
-            pubDate: new Date().toISOString()
-        },
-        {
-            title: '数字经济蓬勃发展',
-            link: '#',
-            description: '数字经济已成为我国经济增长的重要引擎，5G、大数据、云计算等新兴技术应用不断深化。',
-            pubDate: new Date(Date.now() - 3600000).toISOString()
-        },
-        {
-            title: '乡村振兴战略稳步推进',
-            link: '#',
-            description: '我国乡村振兴战略全面实施，农村基础设施不断完善，农民收入持续增长，乡村面貌焕然一新。',
-            pubDate: new Date(Date.now() - 7200000).toISOString()
-        },
-        {
-            title: '生态文明建设成效显著',
-            link: '#',
-            description: '我国生态文明建设取得重大进展，生态环境持续改善，绿色发展理念深入人心。',
-            pubDate: new Date(Date.now() - 10800000).toISOString()
-        },
-        {
-            title: '教育改革不断深化',
-            link: '#',
-            description: '我国教育改革持续推进，素质教育全面实施，高等教育质量不断提升，为国家发展培养了大批人才。',
-            pubDate: new Date(Date.now() - 14400000).toISOString()
-        }
-    ];
-
-    try {
-        // 尝试从备选源中获取新闻
-        let newsItems = [];
-        
-        // 尝试从备选源中获取新闻，设置重试次数
-        const maxRetries = 2;
-        let retryCount = 0;
-        let currentSourceIndex = 0;
-        
-        while (newsItems.length === 0 && retryCount < maxRetries && currentSourceIndex < newsSources.length) {
-            const source = newsSources[currentSourceIndex];
-            
-            try {
-                console.log(`尝试从${source.name}获取新闻 (第${retryCount + 1}次尝试)...`);
-                const response = await fetch(source.url, {
-                    method: 'GET',
-                    mode: 'cors',
-                    timeout: 10000
-                });
-
-                if (response.ok) {
-                    // 检查响应头，确保是XML格式
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('xml')) {
-                        const text = await response.text();
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(text, 'text/xml');
-
-                        // 检查解析是否成功
-                        if (xmlDoc.documentElement.nodeName !== 'parsererror') {
-                            const items = xmlDoc.querySelectorAll('item, entry');
-                            if (items.length > 0) {
-                                newsItems = Array.from(items).slice(0, 5).map(item => ({
-                                    title: item.querySelector('title')?.textContent || '无标题',
-                                    link: item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || '#',
-                                    description: item.querySelector('description')?.textContent || item.querySelector('content')?.textContent || '',
-                                    pubDate: item.querySelector('pubDate')?.textContent || item.querySelector('published')?.textContent || new Date().toISOString()
-                                }));
-                                
-                                console.log(`从${source.name}获取新闻成功，共${newsItems.length}条`);
-                                break; // 成功获取后退出循环
-                            } else {
-                                console.warn(`从${source.name}获取的XML中没有找到新闻条目`);
-                            }
-                        } else {
-                            console.warn(`解析${source.name}的XML失败`);
-                        }
-                    } else {
-                        console.warn(`${source.name}返回的不是XML格式数据`);
-                    }
-                } else {
-                    console.warn(`${source.name}返回非成功状态码: ${response.status}`);
-                }
-            } catch (error) {
-                console.warn(`从${source.name}获取新闻失败:`, error.message);
-                // 继续尝试
-            }
-
-            // 准备下一次尝试
-            currentSourceIndex++;
-            if (currentSourceIndex >= newsSources.length) {
-                retryCount++;
-                currentSourceIndex = 0;
-                if (retryCount < maxRetries) {
-                    console.log(`所有源尝试失败，等待1秒后重试第${retryCount + 1}次...`);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
-        }
-
-        // 如果所有源都失败，使用默认新闻数据
-        if (newsItems.length === 0) {
-            console.warn('所有新闻源都获取失败，使用默认新闻数据');
-            newsItems = defaultNews;
-        }
-
-        await chrome.storage.local.set({ news: newsItems });
-        console.log('新闻更新完成');
-    } catch (error) {
-        console.error('更新新闻时发生错误:', error);
-        // 出现异常时，也使用默认新闻数据
-        await chrome.storage.local.set({ news: defaultNews });
-        console.log('使用默认新闻数据');
-    }
-}
-
 // 初始化
 async function initialize() {
     // 首次运行时检查URL健康
     await checkUrlsHealth();
-
-    // 首次运行时更新新闻
-    await updateNews();
 }
 
 // 启动初始化
