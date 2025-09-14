@@ -24,8 +24,9 @@ async function checkUrlsHealth() {
                 let isHealthy = false;
                 let retryCount = 0;
                 
-                // 特殊处理某些可能需要GET请求的URL
-                const useGetMethod = tool.url.includes('tradingview.com') || tool.url.includes('leonardo.ai') || tool.url.includes('xueqiu.com');
+                // 特殊处理某些可能需要GET请求的URL或有CORS限制的URL
+                const corsRestrictedSites = ['tradingview.com', 'leonardo.ai', 'xueqiu.com', 'xfyun.cn', 'baidu.com'];
+                const useGetMethod = corsRestrictedSites.some(site => tool.url.includes(site));
                 
                 // 重试机制
                 while (!isHealthy && retryCount < maxRetries) {
@@ -51,12 +52,13 @@ async function checkUrlsHealth() {
                     } catch (error) {
                         retryCount++;
                         
-                        // 对leonardo.ai和xueqiu.com做特殊处理，因为它们可能有特殊的CORS限制
-                        if ((tool.url.includes('leonardo.ai') || tool.url.includes('xueqiu.com')) && error.message.includes('Failed to fetch')) {
+                        // 对常见的CORS限制网站做特殊处理
+                        const isCorsRestrictedSite = corsRestrictedSites.some(site => tool.url.includes(site));
+                        if (isCorsRestrictedSite && error.message.includes('Failed to fetch')) {
                             console.warn(`${tool.name} 检测失败（第${retryCount}次）：可能是 CORS 限制或网络问题`); 
-                            // 对这些网站，在最后一次重试时不标记为错误，而是保持上次的状态
+                            // 对这些网站，在最后一次重试时不标记为错误，而是保持警告状态
                             if (retryCount === maxRetries) {
-                                // 如果之前没有状态或状态是 ok，不改变状态
+                                // 如果之前没有状态或状态是 ok，设置为警告
                                 if (!tool.status || tool.status === 'ok') {
                                     tool.status = 'warning'; // 警告状态而不是错误
                                 }
@@ -66,8 +68,14 @@ async function checkUrlsHealth() {
                             
                             // 如果是最后一次重试，则标记为错误
                             if (retryCount === maxRetries) {
-                                tool.status = 'error';
-                                console.error(`URL检测最终失败: ${tool.url}`, error);
+                                // 对于 "Failed to fetch" 错误，可能是CORS限制，使用警告状态
+                                if (error.message.includes('Failed to fetch')) {
+                                    tool.status = 'warning';
+                                    console.warn(`URL检测警告: ${tool.url} - 可能是CORS限制，但服务可能仍然可用`);
+                                } else {
+                                    tool.status = 'error';
+                                    console.error(`URL检测最终失败: ${tool.url}`, error);
+                                }
                             }
                         }
                         
@@ -81,10 +89,10 @@ async function checkUrlsHealth() {
                 tool.lastCheck = Date.now();
             }
 
-            // 过滤掉连续3次失败的工具
+            // 过滤掉连续3天失败的工具（但保留警告状态的工具）
             tree[category][subcategory] = tools.filter(tool => {
-                // 如果状态正常，保留
-                if (tool.status === 'ok') return true;
+                // 如果状态正常或为警告，保留
+                if (tool.status === 'ok' || tool.status === 'warning') return true;
 
                 // 如果状态异常，检查最后一次成功检查的时间
                 // 如果最后一次成功检查时间在3天内，保留
