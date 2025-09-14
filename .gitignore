@@ -1,0 +1,48 @@
+# Chrome Extension specific files
+*.crx
+*.pem
+*.zip
+
+# Development and testing files
+test_*.html
+test_*.js
+requirement.md
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional ESLint cache
+.eslintcache
+
+# Temporary folders
+tmp/
+temp/
