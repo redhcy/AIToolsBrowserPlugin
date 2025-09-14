@@ -1,0 +1,708 @@
+/* CSS 变量定义 */
+:root {
+    --primary-color: #4a6cf7;
+    --primary-hover: #3a5ae0;
+    --secondary-color: #6b7280;
+    --text-color: #1f2937;
+    --text-secondary: #6b7280;
+    --bg-color: #ffffff;
+    --card-bg: #f9fafb;
+    --border-color: #e5e7eb;
+    --input-bg: #ffffff;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --hover-bg: #f3f4f6;
+    
+    /* 现代化设计变量 */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+    --transition: all 0.2s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    width: 400px;
+    height: 600px;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* 滚动条样式 */
+body::-webkit-scrollbar {
+    width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+.container {
+    padding: 16px;
+}
+
+/* 标题栏样式 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+    text-align: left;
+}
+
+/* 通用标题样式 */
+h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 20px 0 12px 0;
+    color: var(--text-color);
+    text-align: left;
+}
+
+h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+h3:hover {
+    opacity: 0.8;
+}
+
+h3::before {
+    content: '▶';
+    font-size: 10px;
+    margin-right: 8px;
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.category.collapsed h3::before {
+    transform: rotate(-90deg);
+}
+
+h4 {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 8px 0 8px 0;
+    color: var(--text-secondary);
+}
+
+/* 按钮基础样式 */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+
+
+/* 区块样式 */
+.tool-categories,
+.prompt-tags {
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.tool-categories:hover,
+.prompt-tags:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+}
+
+/* 子分类样式 */
+.subcategories {
+    margin-top: 8px;
+    padding-left: 16px;
+}
+
+.category {
+    margin-bottom: 16px;
+}
+
+.category:last-child {
+    margin-bottom: 0;
+}
+
+/* 分类和子分类标题 */
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subcategory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-delete-btn,
+.subcategory-delete-btn {
+    background: rgba(239, 68, 68, 0.1);
+    border: none;
+    color: var(--error-color);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    margin-left: 8px;
+}
+
+.category-delete-btn:hover,
+.subcategory-delete-btn:hover {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.category-delete-btn.hidden,
+.subcategory-delete-btn.hidden {
+    display: none;
+}
+
+/* 工具列表样式 */
+.tool-list {
+    list-style: none;
+    padding: 0;
+}
+
+.tool-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.tool-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.tool-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* 拖拽手柄 */
+.drag-handle {
+    cursor: grab;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 4px 6px;
+    margin-right: 8px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    user-select: none;
+}
+
+.drag-handle:hover {
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.drag-handle.hidden {
+    display: none;
+}
+
+/* 拖拽状态 */
+.tool-item.draggable-mode {
+    cursor: move;
+}
+
+.tool-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+}
+
+.tool-list.drag-over {
+    background-color: rgba(74, 108, 247, 0.1);
+    border: 2px dashed var(--primary-color);
+    border-radius: var(--radius-md);
+}
+
+/* 放置指示器 */
+.drop-indicator {
+    height: 2px;
+    background-color: var(--primary-color);
+    margin: 2px 0;
+    border-radius: 1px;
+    position: relative;
+}
+
+.drop-indicator::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -2px;
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+}
+
+.drop-indicator::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -2px;
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+}
+
+.tool-item:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--primary-color);
+    transform: translateX(2px);
+}
+
+/* 工具删除按钮 */
+.tool-delete-btn {
+    background: rgba(239, 68, 68, 0.1);
+    border: none;
+    color: var(--error-color);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    margin-left: 8px;
+}
+
+.tool-delete-btn:hover {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.tool-delete-btn.hidden {
+    display: none;
+}
+
+.tool-item a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    transition: var(--transition);
+}
+
+.tool-item a:hover {
+    color: var(--primary-color);
+}
+
+/* 状态指示器 */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+    border: 2px solid var(--card-bg);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+/* 健康状态指示器 */
+.health-indicator {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.health-indicator.warning {
+    color: #ff9800;
+}
+
+.health-indicator.error {
+    color: #f44336;
+}
+
+.status-indicator.ok {
+    background-color: var(--success-color);
+}
+
+.status-indicator.error {
+    background-color: var(--error-color);
+}
+
+/* AI工具导航区域样式 */
+.tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.tool-header h2 {
+    margin: 0;
+    flex: 1;
+}
+
+/* 管理控件区域 */
+.tool-controls {
+    position: relative;
+}
+
+.manage-menu-btn {
+    padding: 8px;
+    font-size: 16px;
+    background-color: var(--secondary-color);
+    border-radius: var(--radius-md);
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.manage-menu-btn:hover {
+    background-color: #374151;
+}
+
+/* 下拉菜单 */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 160px;
+    z-index: 100;
+    margin-top: 4px;
+}
+
+.dropdown-menu.hidden {
+    display: none;
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-color);
+}
+
+.dropdown-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.dropdown-item:first-child {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.dropdown-item:last-child {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.dropdown-item .icon {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.dropdown-item.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.dropdown-item.active:hover {
+    background-color: var(--primary-hover);
+}
+
+/* 隐藏类和通用样式 */
+.hidden {
+    display: none !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 400px) {
+    body {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .container {
+        padding: 12px;
+    }
+    
+    .prompt-tag {
+        max-width: 100%;
+    }
+}
+
+/* 模态框样式 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.close-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-color);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    background-color: var(--input-bg);
+    transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+}
+
+.primary-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.cancel-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #374151;
+}
+
+/* 分类管理样式 */
+.category-management {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.add-category-section h4,
+.existing-categories h4 {
+    margin: 0 0 12px 0;
+    color: var(--text-color);
+    font-size: 16px;
+}
+
+.category-item {
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--card-bg);
+}
+
+.category-name {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subcategory-list {
+    margin-left: 16px;
+}
+
+.subcategory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    color: var(--text-secondary);
+}
+
+.delete-category-btn,
+.delete-subcategory-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.delete-category-btn:hover,
+.delete-subcategory-btn:hover {
+    background-color: var(--error-color);
+    color: white;
+}

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools Management Test</title>
+    <link rel="stylesheet" href="assets/css/popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI ChatHub - Tools Management Test</h1>
+        </div>
+        
+        <div class="tool-categories">
+            <div class="tool-header">
+                <h2>AI工具导航</h2>
+                <div class="tool-controls">
+                    <button id="manage-menu-btn" class="btn manage-menu-btn" title="管理工具">⚙️</button>
+                    <div id="manage-dropdown" class="dropdown-menu hidden">
+                        <button id="add-tool-btn" class="dropdown-item">
+                            <span class="icon">➕</span>
+                            <span>添加工具</span>
+                        </button>
+                        <button id="manage-category-btn" class="dropdown-item">
+                            <span class="icon">📁</span>
+                            <span>管理分类</span>
+                        </button>
+                        <button id="toggle-edit-mode-btn" class="dropdown-item">
+                            <span class="icon">✏️</span>
+                            <span>编辑模式</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <h3>通用类</h3>
+                    <button class="category-delete-btn hidden" data-category="通用类">×</button>
+                </div>
+                <div class="subcategories">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h4>国内可用</h4>
+                            <button class="subcategory-delete-btn hidden" data-category="通用类" data-subcategory="国内可用">×</button>
+                        </div>
+                        <ul class="tool-list">
+                            <li class="tool-item" draggable="true">
+                                <div class="drag-handle hidden">☰</div>
+                                <div class="tool-info">
+                                    <a href="https://chat.deepseek.com" target="_blank">DeepSeek</a>
+                                    <span class="status-indicator" style="background-color: green"></span>
+                                </div>
+                                <div class="tool-actions">
+                                    <button class="tool-delete-btn hidden">×</button>
+                                </div>
+                            </li>
+                            <li class="tool-item" draggable="true">
+                                <div class="drag-handle hidden">☰</div>
+                                <div class="tool-info">
+                                    <a href="https://kimi.moonshot.cn" target="_blank">Kimi</a>
+                                    <span class="status-indicator" style="background-color: green"></span>
+                                </div>
+                                <div class="tool-actions">
+                                    <button class="tool-delete-btn hidden">×</button>
+                                </div>
+                            </li>
+                            <li class="tool-item" draggable="true">
+                                <div class="drag-handle hidden">☰</div>
+                                <div class="tool-info">
+                                    <a href="https://yiyan.baidu.com" target="_blank">百度文心一言</a>
+                                    <span class="status-indicator" style="background-color: green"></span>
+                                </div>
+                                <div class="tool-actions">
+                                    <button class="tool-delete-btn hidden">×</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="category">
+                <div class="category-header">
+                    <h3>翻译</h3>
+                    <button class="category-delete-btn hidden" data-category="翻译">×</button>
+                </div>
+                <div class="subcategories">
+                    <div class="subcategory">
+                        <div class="subcategory-header">
+                            <h4>国内可用</h4>
+                            <button class="subcategory-delete-btn hidden" data-category="翻译" data-subcategory="国内可用">×</button>
+                        </div>
+                        <ul class="tool-list">
+                            <li class="tool-item" draggable="true">
+                                <div class="drag-handle hidden">☰</div>
+                                <div class="tool-info">
+                                    <a href="https://fanyi.baidu.com" target="_blank">百度翻译</a>
+                                    <span class="status-indicator" style="background-color: green"></span>
+                                </div>
+                                <div class="tool-actions">
+                                    <button class="tool-delete-btn hidden">×</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Tool Modal -->
+    <div id="add-tool-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加AI工具</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>工具名称:</label>
+                    <input type="text" id="tool-name" placeholder="请输入工具名称">
+                </div>
+                <div class="form-group">
+                    <label>工具链接:</label>
+                    <input type="url" id="tool-url" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label>选择分类:</label>
+                    <select id="tool-category">
+                        <option value="">请选择分类</option>
+                        <option value="通用类">通用类</option>
+                        <option value="翻译">翻译</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>选择子分类:</label>
+                    <select id="tool-subcategory">
+                        <option value="">请选择子分类</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-tool-btn" class="btn primary-btn">保存</button>
+                <button class="btn cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Management Modal -->
+    <div id="category-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>分类管理</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="category-management">
+                    <div class="add-category-section">
+                        <h4>添加新分类</h4>
+                        <div class="form-group">
+                            <input type="text" id="new-category" placeholder="请输入分类名称">
+                            <button id="add-category-btn" class="btn">添加</button>
+                        </div>
+                        <div class="form-group">
+                            <select id="parent-category">
+                                <option value="">选择父分类(可选)</option>
+                            </select>
+                            <input type="text" id="new-subcategory" placeholder="子分类名称">
+                            <button id="add-subcategory-btn" class="btn">添加子分类</button>
+                        </div>
+                    </div>
+                    <div class="existing-categories">
+                        <h4>现有分类</h4>
+                        <div id="category-list">
+                            <div class="category-item">
+                                <div class="category-name">
+                                    通用类
+                                    <button class="btn delete-category-btn">删除</button>
+                                </div>
+                                <div class="subcategory-list">
+                                    <div class="subcategory-item">
+                                        <span>• 国内可用</span>
+                                        <button class="btn delete-subcategory-btn">删除</button>
+                                    </div>
+                                    <div class="subcategory-item">
+                                        <span>• 国际工具</span>
+                                        <button class="btn delete-subcategory-btn">删除</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn cancel-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 管理菜单功能
+        document.getElementById('manage-menu-btn').addEventListener('click', function() {
+            const dropdown = document.getElementById('manage-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+        
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.tool-controls')) {
+                document.getElementById('manage-dropdown').classList.add('hidden');
+            }
+        });
+        
+        // 编辑模式切换
+        let isEditMode = false;
+        document.getElementById('toggle-edit-mode-btn').addEventListener('click', function() {
+            const toolDeleteBtns = document.querySelectorAll('.tool-delete-btn');
+            const dragHandles = document.querySelectorAll('.drag-handle');
+            const categoryDeleteBtns = document.querySelectorAll('.category-delete-btn');
+            const subcategoryDeleteBtns = document.querySelectorAll('.subcategory-delete-btn');
+            const toolItems = document.querySelectorAll('.tool-item');
+            
+            isEditMode = !isEditMode;
+            
+            [...toolDeleteBtns, ...dragHandles, ...categoryDeleteBtns, ...subcategoryDeleteBtns].forEach(btn => {
+                if (isEditMode) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+            
+            // 切换拖拽功能
+            toolItems.forEach(item => {
+                if (isEditMode) {
+                    item.draggable = true;
+                    item.classList.add('draggable-mode');
+                } else {
+                    item.draggable = false;
+                    item.classList.remove('draggable-mode');
+                }
+            });
+            
+            // 更新按钮状态
+            const icon = this.querySelector('.icon');
+            const text = this.querySelector('span:last-child');
+            
+            if (isEditMode) {
+                icon.textContent = '✓';
+                text.textContent = '退出编辑';
+                this.classList.add('active');
+            } else {
+                icon.textContent = '✏️';
+                text.textContent = '编辑模式';
+                this.classList.remove('active');
+            }
+            
+            // 隐藏下拉菜单
+            document.getElementById('manage-dropdown').classList.add('hidden');
+        });
+        
+        // 添加简单的拖拽演示功能
+        document.querySelectorAll('.tool-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', '');
+            });
+            
+            item.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                document.querySelectorAll('.tool-list').forEach(list => {
+                    list.classList.remove('drag-over');
+                });
+            });
+        });
+        
+        document.querySelectorAll('.tool-list').forEach(list => {
+            list.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+            
+            list.addEventListener('dragleave', function(e) {
+                if (!this.contains(e.relatedTarget)) {
+                    this.classList.remove('drag-over');
+                }
+            });
+            
+            list.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                console.log('工具已拖放到:', this.closest('.subcategory').querySelector('h4').textContent);
+            });
+        });
+        
+        // 模态框事件
+        document.getElementById('add-tool-btn').addEventListener('click', () => {
+            document.getElementById('manage-dropdown').classList.add('hidden');
+            document.getElementById('add-tool-modal').classList.remove('hidden');
+        });
+        
+        document.getElementById('manage-category-btn').addEventListener('click', () => {
+            document.getElementById('manage-dropdown').classList.add('hidden');
+            document.getElementById('category-modal').classList.remove('hidden');
+        });
+        
+        // 关闭模态框
+        document.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+            });
+        });
+        
+        // 分类选择变化
+        document.getElementById('tool-category').addEventListener('change', function() {
+            const subcategorySelect = document.getElementById('tool-subcategory');
+            subcategorySelect.innerHTML = '<option value="">请选择子分类</option>';
+            
+            if (this.value === '通用类') {
+                subcategorySelect.innerHTML += '<option value="国内可用">国内可用</option><option value="国际工具">国际工具</option>';
+            } else if (this.value === '翻译') {
+                subcategorySelect.innerHTML += '<option value="国内可用">国内可用</option><option value="国际工具">国际工具</option>';
+            }
+        });
+        
+        // 演示保存功能
+        document.getElementById('save-tool-btn').addEventListener('click', () => {
+            const name = document.getElementById('tool-name').value;
+            const url = document.getElementById('tool-url').value;
+            const category = document.getElementById('tool-category').value;
+            const subcategory = document.getElementById('tool-subcategory').value;
+            
+            if (name && url && category && subcategory) {
+                alert(`工具已添加:\n名称: ${name}\nURL: ${url}\n分类: ${category} - ${subcategory}`);
+                document.getElementById('add-tool-modal').classList.add('hidden');
+                // 清空表单
+                document.getElementById('tool-name').value = '';
+                document.getElementById('tool-url').value = '';
+                document.getElementById('tool-category').value = '';
+                document.getElementById('tool-subcategory').value = '';
+            } else {
+                alert('请填写完整的工具信息');
+            }
+        });
+    </script>
+</body>
+</html>

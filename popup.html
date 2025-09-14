@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI ChatHub</title>
+    <link rel="stylesheet" href="assets/css/popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI ChatHub</h1>
+        </div>
+        
+        <div class="tool-categories">
+            <div class="tool-header">
+                <h2>AI工具导航</h2>
+                <div class="tool-controls">
+                    <button id="manage-menu-btn" class="btn manage-menu-btn" title="管理工具">⚙️</button>
+                    <div id="manage-dropdown" class="dropdown-menu hidden">
+                        <button id="add-tool-btn" class="dropdown-item">
+                            <span class="icon">➕</span>
+                            <span>添加工具</span>
+                        </button>
+                        <button id="manage-category-btn" class="dropdown-item">
+                            <span class="icon">📁</span>
+                            <span>管理分类</span>
+                        </button>
+                        <button id="toggle-edit-mode-btn" class="dropdown-item">
+                            <span class="icon">✏️</span>
+                            <span>编辑模式</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="tool-tree"></div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+
+    <!-- Add Tool Modal -->
+    <div id="add-tool-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加AI工具</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>工具名称:</label>
+                    <input type="text" id="tool-name" placeholder="请输入工具名称">
+                </div>
+                <div class="form-group">
+                    <label>工具链接:</label>
+                    <input type="url" id="tool-url" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label>选择分类:</label>
+                    <select id="tool-category">
+                        <option value="">请选择分类</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>选择子分类:</label>
+                    <select id="tool-subcategory">
+                        <option value="">请选择子分类</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-tool-btn" class="btn primary-btn">保存</button>
+                <button class="btn cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Management Modal -->
+    <div id="category-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>分类管理</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="category-management">
+                    <div class="add-category-section">
+                        <h4>添加新分类</h4>
+                        <div class="form-group">
+                            <input type="text" id="new-category" placeholder="请输入分类名称">
+                            <button id="add-category-btn" class="btn">添加</button>
+                        </div>
+                        <div class="form-group">
+                            <select id="parent-category">
+                                <option value="">选择父分类(可选)</option>
+                            </select>
+                            <input type="text" id="new-subcategory" placeholder="子分类名称">
+                            <button id="add-subcategory-btn" class="btn">添加子分类</button>
+                        </div>
+                    </div>
+                    <div class="existing-categories">
+                        <h4>现有分类</h4>
+                        <div id="category-list"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn cancel-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
