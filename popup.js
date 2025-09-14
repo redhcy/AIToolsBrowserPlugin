@@ -239,9 +239,11 @@ async function renderToolTree() {
             // 根据状态确定健康指示器样式和文本
             let healthIndicator = '';
             if (tool.status === 'error') {
-                healthIndicator = `<span class="health-indicator error">❌</span>`;
+                healthIndicator = `<span class="health-indicator error" title="连接失败，服务可能不可用">❌</span>`;
+            } else if (tool.status === 'warning') {
+                healthIndicator = `<span class="health-indicator warning" title="连接不稳定，但服务可能仍然可用">⚠️</span>`;
             } else if (tool.status && tool.status !== 'ok') {
-                healthIndicator = `<span class="health-indicator warning">⚠️</span>`;
+                healthIndicator = `<span class="health-indicator warning" title="状态未知">⚠️</span>`;
             }
             
             toolItem.innerHTML = `

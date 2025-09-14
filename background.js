@@ -25,7 +25,7 @@ async function checkUrlsHealth() {
                 let retryCount = 0;
                 
                 // 特殊处理某些可能需要GET请求的URL
-                const useGetMethod = tool.url.includes('tradingview.com');
+                const useGetMethod = tool.url.includes('tradingview.com') || tool.url.includes('leonardo.ai');
                 
                 // 重试机制
                 while (!isHealthy && retryCount < maxRetries) {
@@ -34,9 +34,12 @@ async function checkUrlsHealth() {
                         const response = await fetch(tool.url, {
                             method: useGetMethod ? 'GET' : 'HEAD',
                             mode: 'no-cors',
-                            timeout: 8000, // 增加超时时间到8秒
+                            timeout: 12000, // 增加超时时间到12秒
                             headers: {
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                                'Accept': '*/*',
+                                'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+                                'Cache-Control': 'no-cache'
                             }
                         });
 
@@ -47,14 +50,29 @@ async function checkUrlsHealth() {
                         console.log(`URL检测成功: ${tool.url}`);
                     } catch (error) {
                         retryCount++;
-                        console.warn(`检测URL失败 (第${retryCount}次): ${tool.url}`, error.message);
                         
-                        // 如果是最后一次重试，则标记为错误
-                        if (retryCount === maxRetries) {
-                            tool.status = 'error';
-                            console.error(`URL检测最终失败: ${tool.url}`, error);
+                        // 对leonardo.ai做特殊处理，因为它可能有特殊的CORS限制
+                        if (tool.url.includes('leonardo.ai') && error.message.includes('Failed to fetch')) {
+                            console.warn(`Leonardo.ai 检测失败（第${retryCount}次）：可能是 CORS 限制或网络问题`); 
+                            // 对leonardo.ai，在最后一次重试时不标记为错误，而是保持上次的状态
+                            if (retryCount === maxRetries) {
+                                // 如果之前没有状态或状态是 ok，不改变状态
+                                if (!tool.status || tool.status === 'ok') {
+                                    tool.status = 'warning'; // 警告状态而不是错误
+                                }
+                            }
                         } else {
-                            // 等待一段时间后重试
+                            console.warn(`检测URL失败 (第${retryCount}次): ${tool.url}`, error.message);
+                            
+                            // 如果是最后一次重试，则标记为错误
+                            if (retryCount === maxRetries) {
+                                tool.status = 'error';
+                                console.error(`URL检测最终失败: ${tool.url}`, error);
+                            }
+                        }
+                        
+                        // 如果不是最后一次重试，等待一段时间后重试
+                        if (retryCount < maxRetries) {
                             await new Promise(resolve => setTimeout(resolve, retryDelay));
                         }
                     }

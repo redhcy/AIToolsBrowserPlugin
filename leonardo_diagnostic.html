@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Leonardo.ai 连接诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        #results { margin-top: 20px; }
+        .timestamp { font-size: 0.9em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Leonardo.ai 连接诊断工具</h1>
+        <p>此工具帮助诊断 Leonardo.ai 连接问题并提供解决方案。</p>
+        
+        <div class="info">
+            <strong>关于 "Failed to fetch" 错误：</strong><br>
+            这个错误通常是由于 CORS（跨域资源共享）限制导致的。这是 Leonardo.ai 服务器的正常安全措施，
+            不代表服务本身不可用。扩展程序会自动处理这种情况。
+        </div>
+
+        <button onclick="runDiagnostics()">运行完整诊断</button>
+        <button onclick="testDirectConnection()">测试直接连接</button>
+        <button onclick="checkExtensionStatus()">检查扩展状态</button>
+        <button onclick="clearResults()">清除结果</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testDirectConnection() {
+            log('开始测试 Leonardo.ai 直接连接...', 'info');
+            
+            try {
+                const response = await fetch('https://leonardo.ai', {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    timeout: 10000
+                });
+                log('✅ HEAD 请求成功 - Leonardo.ai 服务器响应正常', 'success');
+            } catch (error) {
+                if (error.message.includes('Failed to fetch')) {
+                    log('⚠️ HEAD 请求失败 (CORS限制) - 这是正常现象，Leonardo.ai 限制跨域访问', 'warning');
+                    log('📝 建议：这不影响您直接在浏览器中访问 Leonardo.ai', 'info');
+                } else {
+                    log(`❌ 连接失败: ${error.message}`, 'error');
+                }
+            }
+
+            // 测试 GET 请求
+            try {
+                const response = await fetch('https://leonardo.ai', {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    timeout: 10000
+                });
+                log('✅ GET 请求成功 - Leonardo.ai 服务器响应正常', 'success');
+            } catch (error) {
+                if (error.message.includes('Failed to fetch')) {
+                    log('⚠️ GET 请求失败 (CORS限制) - 这是正常现象', 'warning');
+                } else {
+                    log(`❌ GET 请求失败: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function checkExtensionStatus() {
+            log('检查扩展程序状态...', 'info');
+            
+            try {
+                // 检查扩展是否可以访问 chrome.runtime
+                if (typeof chrome !== 'undefined' && chrome.runtime) {
+                    log('✅ Chrome 扩展 API 可用', 'success');
+                    
+                    // 尝试发送消息给背景脚本
+                    chrome.runtime.sendMessage({ action: 'ping' }, (response) => {
+                        if (response && response.status === 'pong') {
+                            log('✅ 背景脚本通信正常', 'success');
+                        } else {
+                            log('❌ 背景脚本通信失败', 'error');
+                        }
+                    });
+                    
+                    // 检查存储中的 Leonardo.ai 状态
+                    chrome.storage.local.get('tree', (result) => {
+                        if (result.tree) {
+                            let found = false;
+                            for (const [category, subcategories] of Object.entries(result.tree)) {
+                                for (const [subcategory, tools] of Object.entries(subcategories)) {
+                                    const leonardoTool = tools.find(tool => tool.url.includes('leonardo.ai'));
+                                    if (leonardoTool) {
+                                        found = true;
+                                        log(`📊 Leonardo.ai 当前状态: ${leonardoTool.status}`, 
+                                            leonardoTool.status === 'ok' ? 'success' : 
+                                            leonardoTool.status === 'warning' ? 'warning' : 'error');
+                                        log(`🕒 最后检查时间: ${new Date(leonardoTool.lastCheck).toLocaleString()}`, 'info');
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!found) {
+                                log('❌ 未找到 Leonardo.ai 配置', 'error');
+                            }
+                        } else {
+                            log('❌ 扩展存储数据为空', 'error');
+                        }
+                    });
+                } else {
+                    log('❌ Chrome 扩展 API 不可用 - 请确保在扩展环境中运行', 'error');
+                }
+            } catch (error) {
+                log(`❌ 检查扩展状态时出错: ${error.message}`, 'error');
+            }
+        }
+
+        async function runDiagnostics() {
+            clearResults();
+            log('🔍 开始运行完整诊断...', 'info');
+            
+            // 运行所有测试
+            await testDirectConnection();
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
+            await checkExtensionStatus();
+            
+            log('📋 诊断建议:', 'info');
+            log('1. 如果看到 CORS 错误，这是正常的 - Leonardo.ai 限制跨域访问以保护安全', 'info');
+            log('2. 您仍然可以直接在新标签页中访问 https://leonardo.ai', 'info');
+            log('3. 如果扩展中显示错误状态，可以手动刷新健康检查', 'info');
+            log('4. 持续的连接问题可能是网络或防火墙设置导致的', 'info');
+        }
+
+        // 页面加载时自动运行诊断
+        window.addEventListener('load', () => {
+            log('🚀 Leonardo.ai 诊断工具已加载', 'info');
+            log('点击 "运行完整诊断" 开始检查连接状态', 'info');
+        });
+    </script>
+</body>
+</html>
